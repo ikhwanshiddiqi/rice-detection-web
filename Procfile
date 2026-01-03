@@ -1,1 +1,1 @@
-web: gunicorn --timeout 120 --workers 1 app:app
+web: pip install --upgrade pip setuptools wheel && gunicorn --timeout 120 --workers 1 app:app
