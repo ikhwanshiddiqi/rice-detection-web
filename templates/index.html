@@ -1,199 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediksi Harga Cryptocurrency</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>RiceGuard - Klasifikasi Penyakit Padi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        .header-section {
-            background: linear-gradient(135deg, #698363, #84a548b2);
-            color: #fff;
-            padding: 2rem 0;
-            text-align: center;
-        }
-
         body {
-            background: #f8f9fa;
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
-        .custom-card-header {
-            background: linear-gradient(135deg, #698363, #84a548b2) !important;
-            color: #fff !important;
+        .navbar {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .custom-btn {
-            background: linear-gradient(135deg, #698363, #84a548b2);
+        .card {
             border: none;
-            color: #fff;
+            border-radius: 20px;
+            transition: transform 0.3s;
         }
 
-        .custom-btn:hover {
-            opacity: 0.9;
+        .upload-zone {
+            border: 2px dashed #2e7d32;
+            border-radius: 15px;
+            padding: 30px;
+            background: #f1f8e9;
+            cursor: pointer;
         }
 
-        .footer {
-            text-align: center;
-            padding: .5rem;
-            background: #e9ecef;
-            color: #333;
+        .upload-zone:hover {
+            background: #e8f5e9;
         }
 
-        #resultSection {
-            display: none;
+        .btn-success {
+            background-color: #2e7d32;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .result-img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            object-fit: cover;
+            height: 250px;
+        }
+
+        .prediction-text {
+            color: #1b5e20;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .accuracy-badge {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #bbdefb;
+            font-weight: bold;
+        }
+
+        .xai-info {
+            font-style: italic;
+            font-size: 0.85rem;
+            color: #546e7a;
+        }
+
+        footer {
+            padding: 30px 0;
+            color: #4e342e;
+            opacity: 0.8;
         }
     </style>
 </head>
 
 <body>
-    <!-- Header Section -->
-    <div class="header-section">
+
+    <nav class="navbar navbar-dark mb-5">
         <div class="container">
-            <h1 class="display-4 fw-bold">Prediksi Harga Cryptocurrency</h1>
-            <p class="lead">Temukan tren harga dengan sentuhan modern dan cerdas!</p>
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-shield-check"></i> RiceGuard: AI Disease Detection
+            </span>
         </div>
-    </div>
+    </nav>
 
-    <!-- Bagian Form -->
-    <div id="formSection" class="container my-5">
-        <div class="card shadow-lg">
-            <div class="card-header custom-card-header">
-                <h2 class="h4 mb-0">Silakan Pilih Opsi Prediksi Anda</h2>
-            </div>
-            <div class="card-body">
-                <form id="predictionForm" method="post">
-                    <div class="mb-3">
-                        <label for="dataset" class="form-label">Pilih Dataset:</label>
-                        <select name="dataset" id="dataset" class="form-select" required>
-                            <option value="btc">Bitcoin (BTC)</option>
-                            <option value="eth">Ethereum (ETH)</option>
-                            <option value="xrp">Ripple (XRP)</option>
-                            <option value="sol">Solana (SOL)</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="model" class="form-label">Pilih Model:</label>
-                        <select name="model" id="model" class="form-select" required>
-                            <option value="gru">GRU</option>
-                            <option value="lstm">LSTM</option>
-                            <option value="bigru">Bi-GRU</option>
-                            <option value="bilstm">Bi-LSTM</option>
-                            <option value="stacked_gru">Stacked GRU</option>
-                            <option value="stacked_lstm">Stacked LSTM</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="days_ahead" class="form-label">Berapa hari ke depan yang diprediksi:</label>
-                        <input type="number" name="days_ahead" id="days_ahead" class="form-control" min="1" required>
-                    </div>
-                    <button type="submit" class="btn btn-lg custom-btn"><i class="fas fa-chart-line"></i> Prediksi
-                        Sekarang</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="card p-4 shadow-sm h-100">
+                    <h4 class="mb-3"><i class="bi bi-camera"></i> Deteksi Gejala</h4>
+                    <p class="text-muted small">Unggah citra daun padi untuk mendapatkan diagnosis otomatis berbasis
+                        model MobileNetV2.</p>
 
-    <!-- Bagian Hasil -->
-    <div id="resultSection" class="container my-5">
-        <div class="card shadow-lg">
-            <div class="card-header custom-card-header">
-                {% if dataset and model_name and days_ahead %}
-                <h2 class="h4 mb-0">
-                    Prediksi Cryptocurrency
-                    {% if dataset == 'btc' %}Bitcoin (BTC)
-                    {% elif dataset == 'eth' %}Ethereum (ETH)
-                    {% elif dataset == 'xrp' %}Ripple (XRP)
-                    {% elif dataset == 'sol' %}Solana (SOL)
-                    {% endif %}
-                    ({{ days_ahead }}) hari ke depan dengan model
-                    {% if model_name == 'gru' %}GRU
-                    {% elif model_name == 'lstm' %}LSTM
-                    {% elif model_name == 'bigru' %}Bi-GRU
-                    {% elif model_name == 'bilstm' %}Bi-LSTM
-                    {% elif model_name == 'stacked_gru' %}Stacked GRU
-                    {% elif model_name == 'stacked_lstm' %}Stacked LSTM
-                    {% endif %}
-                </h2>
+                    <form action="/" method="post" enctype="multipart/form-data">
+                        <div class="upload-zone text-center mb-4"
+                            onclick="document.getElementById('fileInput').click();">
+                            <i class="bi bi-cloud-arrow-up-fill fs-1 text-success"></i>
+                            <p class="mt-2 mb-0 fw-bold">Klik untuk Pilih Gambar</p>
+                            <span class="text-muted small">(PNG, JPG, JPEG)</span>
+                            <input type="file" id="fileInput" name="image" accept="image/*" class="d-none" required
+                                onchange="this.form.submit()">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success"><i class="bi bi-cpu"></i> Proses
+                                Analisis</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                {% if prediction %}
+                <div class="card p-4 shadow-sm">
+                    <div class="text-center mb-4">
+                        <h4 class="mb-0">Hasil Diagnosis</h4>
+                        <hr class="mx-auto w-25 border-2 border-success">
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted mb-2 d-block text-center">Citra Masukan</label>
+                            <img src="{{ image_url }}" class="result-img" alt="Citra Asli">
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted mb-2 d-block text-center">Visualisasi
+                                Grad-CAM</label>
+                            <img src="{{ gradcam_url }}" class="result-img" alt="Visualisasi XAI">
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="mb-0 text-muted">Penyakit Terdeteksi:</p>
+                        <h2 class="prediction-text fw-bold mb-3">{{ prediction }}</h2>
+                        <span class="badge accuracy-badge p-2 px-3 mb-4">
+                            Confidence Score: {{ accuracy }}
+                        </span>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-3 mt-2">
+                        <div class="d-flex">
+                            <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                            <div>
+                                <h6 class="alert-heading fw-bold mb-1">Analisis Transparansi (Explainable AI)</h6>
+                                <p class="xai-info mb-0">Warna merah pada peta panas (Grad-CAM) menunjukkan area
+                                    lesi/fitur penyakit yang menjadi fokus utama jaringan saraf dalam melakukan
+                                    klasifikasi.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-start border-4 border-warning shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold text-warning-emphasis">
+                                        <i class="bi bi-shield-lock-fill"></i> Langkah Pencegahan
+                                    </h6>
+                                    <p class="card-text small text-muted" style="white-space: pre-line;">{{
+                                        info.Pencegahan }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-start border-4 border-danger shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold text-danger">
+                                        <i class="bi bi-capsule"></i> Langkah Pengobatan
+                                    </h6>
+                                    <p class="card-text small text-muted" style="white-space: pre-line;">{{
+                                        info.Pengobatan }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% else %}
-                <h2 class="h4 mb-0">Tidak ada data prediksi</h2>
+                <div
+                    class="card p-5 shadow-sm text-center border-0 bg-transparent h-100 d-flex align-items-center justify-content-center">
+                    <div class="opacity-50">
+                        <i class="bi bi-image-fill display-1 text-muted"></i>
+                        <h5 class="mt-3">Menunggu Unggahan Citra</h5>
+                        <p class="small">Hasil klasifikasi dan visualisasi Grad-CAM akan muncul di sini.</p>
+                    </div>
+                </div>
                 {% endif %}
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <div id="predictionResult">
-                            {% if prediction %}
-                            <h3 class="h5">Hasil Prediksi:</h3>
-                            <ul class="list-group">
-                                {% for day, pred in prediction %}
-                                <li class="list-group-item">Hari {{ day }} : <strong>{{ pred }}</strong></li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div id="plotResult">
-                            {% if plot_data %}
-                            <h3 class="h5">Visualisasi Hasil Prediksi:</h3>
-                            <img src="data:image/png;base64,{{ plot_data }}" alt="Plot Prediksi"
-                                class="img-fluid rounded">
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center mt-3">
-                    <button id="backButton" class="btn btn-secondary" onclick="window.location.reload();">
-                        <i class="fas fa-arrow-left"></i> Kembali
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer mt-5">
-        <p>&copy; 2025 Crypto Insights. All rights reserved. Keep calm and trade on!</p>
-    </div>
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-0"><b>&copy; 2025 Skripsi Teknologi Informasi</b></p>
+            <p class="small text-muted">MobileNetV2 + AdamW + Grad-CAM Implementation</p>
+        </div>
+    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
-        crossorigin="anonymous"></script>
-    <script>
-        const form = document.getElementById("predictionForm");
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(form);
-
-            fetch("/", {
-                method: "POST",
-                body: formData
-            })
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, "text/html");
-
-                    const resultContent = doc.getElementById("resultSection").innerHTML;
-                    document.getElementById("resultSection").innerHTML = resultContent;
-
-                    document.getElementById("formSection").style.display = "none";
-                    document.getElementById("resultSection").style.display = "block";
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-        });
-
-        document.getElementById("backButton").addEventListener("click", () => {
-            document.getElementById("resultSection").style.display = "none";
-            document.getElementById("formSection").style.display = "block";
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
