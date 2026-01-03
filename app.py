@@ -11,7 +11,14 @@ app = Flask(__name__)
 # 1. LOAD MODEL
 # Gunakan model terbaik: MobileNetV2 AdamW
 MODEL_PATH = 'model/model_mobilenetv2_adamw.keras' 
-model = load_model(MODEL_PATH)
+model = None
+
+try:
+    model = load_model(MODEL_PATH)
+    print("✓ Model loaded successfully")
+except Exception as e:
+    print(f"⚠ Error loading model: {e}")
+    print("App will run but predictions will not be available")
 
 # Urutan kelas sesuai folder dataset
 classes = ['Bacterialblight', 'Blast', 'Brownspot', 'Tungro']
@@ -137,6 +144,9 @@ disease_info = {
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        if model is None:
+            return render_template('index.html', error="Model belum tersedia. Silakan coba lagi nanti.")
+        
         file = request.files['image']
         if file:
             # Simpan file yang diupload ke folder static/uploads
@@ -185,4 +195,5 @@ if __name__ == '__main__':
     os.makedirs('static/uploads', exist_ok=True)
     os.makedirs('static/results', exist_ok=True)
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    print(f"Starting Flask app on port {port}...")
+    app.run(debug=False, host='0.0.0.0', port=port, threaded=True)
