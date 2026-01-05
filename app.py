@@ -5,20 +5,16 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request
 from tensorflow.keras.models import load_model
+from io import BytesIO
+import base64
+from PIL import Image
 
 app = Flask(__name__)
 
 # 1. LOAD MODEL
 # Gunakan model terbaik: MobileNetV2 AdamW
 MODEL_PATH = 'model/model_mobilenetv2_adamw.keras' 
-model = None
-
-try:
-    model = load_model(MODEL_PATH)
-    print("✓ Model loaded successfully")
-except Exception as e:
-    print(f"⚠ Error loading model: {e}")
-    print("App will run but predictions will not be available")
+model = load_model(MODEL_PATH)
 
 # Urutan kelas sesuai folder dataset
 classes = ['Bacterialblight', 'Blast', 'Brownspot', 'Tungro']
@@ -35,6 +31,17 @@ def my_preprocessing(img):
     limg = cv2.merge((cl,a,b))
     final_img = cv2.cvtColor(limg, cv2.COLOR_LAB2RGB)
     return final_img.astype('float32') / 255.0
+
+def find_last_conv_layer(model):
+    """Mencari layer Conv2D terakhir di model (mendukung backbone seperti MobileNet/DenseNet)"""
+    for layer in reversed(model.layers):
+        if isinstance(layer, tf.keras.Model):  # Untuk backbone seperti MobileNet/DenseNet
+            for inner_layer in reversed(layer.layers):
+                if isinstance(inner_layer, tf.keras.layers.Conv2D):
+                    return inner_layer.name
+        if isinstance(layer, tf.keras.layers.Conv2D):
+            return layer.name
+    return None
 
 def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
     try:
@@ -144,18 +151,13 @@ disease_info = {
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if model is None:
-            return render_template('index.html', error="Model belum tersedia. Silakan coba lagi nanti.")
-        
         file = request.files['image']
         if file:
-            # Simpan file yang diupload ke folder static/uploads
-            filename = file.filename
-            upload_path = os.path.join('static/uploads', filename)
-            file.save(upload_path)
-
-            # Preprocessing Input Gambar untuk Prediksi Model
-            img_raw = tf.keras.utils.load_img(upload_path, target_size=(224, 224))
+            # Baca file langsung dari memory (tanpa menyimpan ke disk)
+            file_bytes = BytesIO(file.read())
+            
+            # Load gambar menggunakan PIL (lebih stable untuk BytesIO)
+            img_raw = Image.open(file_bytes).convert('RGB').resize((224, 224))
             img_array = tf.keras.utils.img_to_array(img_raw)
             img_preprocessed = my_preprocessing(img_array)
             img_input = np.expand_dims(img_preprocessed, axis=0)
@@ -169,31 +171,32 @@ def index():
             # Ambil informasi solusi berdasarkan label hasil prediksi
             info = disease_info.get(label, {'Pencegahan': '-', 'Pengobatan': '-'})
 
-            # Grad-CAM (Target layer: out_relu untuk MobileNetV2)
-            heatmap = make_gradcam_heatmap(img_input, model, 'out_relu')
+            # Grad-CAM (Mencari layer Conv2D terakhir secara dinamis seperti di notebook)
+            last_conv_layer_name = find_last_conv_layer(model)
+            heatmap = make_gradcam_heatmap(img_input, model, last_conv_layer_name)
             
             # Superimpose (Gunakan img_array uint8 agar warna benar)
             visual_result = get_superimposed_img(img_array.astype('uint8'), heatmap)
             
-            # Simpan hasil Grad-CAM ke folder static/results
-            result_filename = f"gradcam_{filename}"
-            result_path = os.path.join('static/results', result_filename)
-            # Simpan dalam BGR karena OpenCV menggunakan BGR
-            cv2.imwrite(result_path, cv2.cvtColor(visual_result, cv2.COLOR_RGB2BGR))
+            # Convert hasil Grad-CAM ke base64 (tanpa menyimpan ke disk)
+            _, buffer = cv2.imencode('.png', cv2.cvtColor(visual_result, cv2.COLOR_RGB2BGR))
+            gradcam_base64 = base64.b64encode(buffer).decode('utf-8')
+            gradcam_url = f"data:image/png;base64,{gradcam_base64}"
+            
+            # Convert gambar original ke base64 (tanpa menyimpan ke disk)
+            _, buffer = cv2.imencode('.png', cv2.cvtColor(np.uint8(img_array), cv2.COLOR_RGB2BGR))
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+            image_url = f"data:image/png;base64,{image_base64}"
 
             return render_template('index.html', 
                                    prediction=label, 
                                    accuracy=f"{conf:.2%}", 
-                                   image_url=upload_path,
-                                   gradcam_url=result_path,
-                                   info=info # Kirim info ke HTML
+                                   image_url=image_url,
+                                   gradcam_url=gradcam_url,
+                                   info=info
                                    )
                                    
     return render_template('index.html')
                                    
 if __name__ == '__main__':
-    os.makedirs('static/uploads', exist_ok=True)
-    os.makedirs('static/results', exist_ok=True)
-    port = int(os.environ.get('PORT', 5000))
-    print(f"Starting Flask app on port {port}...")
-    app.run(debug=False, host='0.0.0.0', port=port, threaded=True)
+    app.run(debug=True, port=5000)
