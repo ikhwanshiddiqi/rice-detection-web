@@ -1,4 +1,3 @@
-import os
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -84,9 +83,7 @@ def get_superimposed_img(img_raw, heatmap, alpha=0.6):
     # Gabungkan gambar asli dengan heatmap
     return cv2.addWeighted(img_array, 1 - alpha, colored_heatmap, alpha, 0)
 
-# ==========================================
 # 3. Informasi Penyakit (Solusi & Pencegahan)
-# ==========================================
 disease_info = {
     'Bacterialblight': {
         'nama_umum': 'Bacterial Blight / Hawar Daun Bakteri (Kresek)',
@@ -164,12 +161,17 @@ def index():
 
             # Prediksi dengan Model
             preds = model.predict(img_input, verbose=0)[0]
-            idx = np.argmax(preds)
-            conf = preds[idx]
-            label = classes[idx]
+            idx = int(np.argmax(preds))
+            conf = float(preds[idx])
 
-            # Ambil informasi solusi berdasarkan label hasil prediksi
-            info = disease_info.get(label, {'Pencegahan': '-', 'Pengobatan': '-'})
+            # Jika confidence < 70% maka anggap tidak diketahui
+            if conf < 0.7:
+                label = 'Unknown'
+                info = {'Pencegahan': '-', 'Pengobatan': '-'}
+            else:
+                label = classes[idx]
+                # Ambil informasi solusi berdasarkan label hasil prediksi
+                info = disease_info.get(label, {'Pencegahan': '-', 'Pengobatan': '-'})
 
             # Grad-CAM (Mencari layer Conv2D terakhir secara dinamis seperti di notebook)
             last_conv_layer_name = find_last_conv_layer(model)

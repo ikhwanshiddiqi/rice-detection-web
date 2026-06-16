@@ -135,11 +135,24 @@
                     </div>
 
                     <div class="text-center">
+                        {% if prediction == 'Unknown' %}
+                        <p class="mb-0 text-muted">Status Diagnosis:</p>
+                        <h2 class="fw-bold mb-3" style="color: #d32f2f;">⚠️ {{ prediction }}</h2>
+                        <span class="badge p-2 px-3 mb-4" style="background-color: #ffcdd2; color: #b71c1c;">
+                            Confidence Score: {{ accuracy }} (Terlalu Rendah)
+                        </span>
+                        <div class="alert alert-warning border-0 rounded-3 mt-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Model tidak cukup yakin dengan diagnosis ini.</strong> Gambar mungkin tidak jelas
+                            atau tidak sesuai dengan dataset pelatihan.
+                        </div>
+                        {% else %}
                         <p class="mb-0 text-muted">Penyakit Terdeteksi:</p>
                         <h2 class="prediction-text fw-bold mb-3">{{ prediction }}</h2>
                         <span class="badge accuracy-badge p-2 px-3 mb-4">
                             Confidence Score: {{ accuracy }}
                         </span>
+                        {% endif %}
                     </div>
 
                     <div class="alert alert-info border-0 rounded-3 mt-2">
@@ -152,6 +165,8 @@
                             </div>
                         </div>
                     </div>
+
+                    {% if prediction != 'Unknown' %}
 
                     <div class="row g-3 mt-1">
                         <div class="col-md-6">
@@ -177,6 +192,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div
